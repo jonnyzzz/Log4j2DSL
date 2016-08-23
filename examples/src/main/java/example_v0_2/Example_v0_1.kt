@@ -1,4 +1,4 @@
-package example_v0
+package example_v0_2
 
 
 /*
@@ -17,17 +17,33 @@ val x =
 log4j {
   //use this
   rootLogger = "ERROR,stdout"
-  //instead of that
-  this.param("log4j.rootLogger", "ERROR,stdout")
+  //use this
+  appender("stdout", "org.apache.log4j.ConsoleAppender") {
+    layout("org.apache.log4j.PatternLayout") {
+      param("ConversionPattern", "%p\t%d{ISO8601}\t%r\t%c\t[%t]\t%m%n")
+    }
+  }
 
   param("log4j.logger.corp.mega", "INFO")
   comment("meaningful comment goes here")
   param("log4j.logger.corp.mega.itl.web.metrics", "INFO")
-  param("log4j.appender.stdout", "org.apache.log4j.ConsoleAppender")
-  param("log4j.appender.stdout.layout", "org.apache.log4j.PatternLayout")
-  param("log4j.appender.stdout.layout.ConversionPattern", "%p\t%d{ISO8601}\t%r\t%c\t[%t]\t%m%n")
 }
 
+
+interface Log4JAppender {
+  var type: String
+  fun layout(type : String, layout : Log4JLayout.() -> Unit)
+}
+
+fun Log4J.appender(name : String, type : String, builder : Log4JAppender.() -> Unit) {
+  param("log4j.appender.name", "")
+}
+
+
+
+interface Log4JLayout {
+  var type : String
+}
 
 
 var Log4J.rootLogger : String
