@@ -33,9 +33,19 @@ log4j {
     level = INFO
   }
 
+
+  rootLogger(level = ERROR, appeners = listOf(stdout))
+  logger("corp.mega", additivity = false, level = INFO)
+
   param("log4j.logger.corp.mega", "INFO")
   param("log4j.additivity.corp.mega", "false")
 }
+
+val Log4J.ERROR : Log4JLevel
+  get() = Log4JLevel.ERROR
+
+val Log4J.INFO : Log4JLevel
+  get() = Log4JLevel.INFO
 
 enum class Log4JLevel {
   DEBUG, INFO, WARN, ERROR
