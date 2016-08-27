@@ -1,4 +1,4 @@
-package example_v0_4
+package example_v0_6
 
 import org.apache.log4j.Appender
 import org.apache.log4j.ConsoleAppender
@@ -23,8 +23,8 @@ val x =
 log4j {
   //use this
   val stdout = appender("stdout", ConsoleAppender::class) {
-    layout(PatternLayout::class) {
-      param("ConversionPattern", "%p\t%d{ISO8601}\t%r\t%c\t[%t]\t%m%n")
+    layout<PatternLayout> {
+      conversionPattern = "%p\t%d{ISO8601}\t%r\t%c\t[%t]\t%m%n"
     }
   }
 
@@ -97,6 +97,14 @@ interface Log4JLogger {
 
 }
 
+
+val String.bytesSize : Int
+  get() = toByteArray(Charsets.UTF_8).size
+
+
+val xzxxx =
+        "sas".bytesSize
+
 val Log4J.INFO : Log4JLevel
   get()= Log4JLevel.INFO
 
@@ -111,8 +119,21 @@ interface Log4jAppenderRef {
 interface Log4JAppender {
   var type: String
   fun layout(type : String, layout : Log4JLayout.() -> Unit)
-  fun <T : Layout> layout(type : KClass<T>, layout : Log4JLayout.() -> Unit)
+  fun <T : Layout> layout(type : KClass<T>, layout : T.() -> Unit)
 }
+
+inline fun <reified T : Layout> Log4JAppender.layout(crossinline l : T.() -> Unit) {
+  val type = T::class ///allowed for reified generics
+  layout(type) {
+    this.l()
+  }
+}
+
+inline fun <reified T : Appender> Log4J.appender(name : String, crossinline l : T.() -> Unit) {
+  appender(name, T::class) {
+  }
+}
+
 
 fun <T : Appender> Log4J.appender(name : String, type : KClass<T>, builder : Log4JAppender.() -> Unit) : Log4jAppenderRef {
   return object : Log4jAppenderRef {}
@@ -138,6 +159,11 @@ var Log4J.rootLogger_old : String
 interface Log4J {
   fun comment(text : String)
   fun param(name: String, value : String) : Unit                  // or "$this"
+
+
+  fun <T : Appender> Log4J.appender(name : String, type : KClass<T>, builder : Log4JAppender.() -> Unit) : Log4jAppenderRef {
+    return object : Log4jAppenderRef {}
+  }
 }
 
 fun log4j(builder : Log4J.() -> Unit) {
