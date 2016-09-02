@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 
 /*
 log4j.rootLogger=ERROR,stdout
-log4j.logger.corp.mega=INFO
+log4j.logger.corp.mega.itl.web.metrics=INFO, stdout
 # meaningful comment goes here
 log4j.logger.corp.mega.itl.web.metrics=INFO
 
@@ -18,6 +18,28 @@ log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
 log4j.appender.stdout.layout.ConversionPattern=%p\t%d{ISO8601}\t%r\t%c\t[%t]\t%m%n
 */
 
+val y =
+log4j {
+  val stdout = appender<ConsoleAppender>("stdout") {
+    layout<PatternLayout> {
+      conversionPattern = "%p\t%d{ISO8601}\t%r\t%c\t[%t]\t%m%n"
+    }
+  }
+
+  rootLogger {
+    level = ERROR
+    appenders += stdout
+  }
+
+  logger("corp.mega.itl.web.metrics") {
+    level = INFO
+  }
+
+  logger("corp.mega") {
+    level = INFO
+    appenders += stdout
+  }
+}
 
 val x =
 log4j {
@@ -129,8 +151,8 @@ inline fun <reified T : Layout> Log4JAppender.layout(crossinline l : T.() -> Uni
   }
 }
 
-inline fun <reified T : Appender> Log4J.appender(name : String, crossinline l : T.() -> Unit) {
-  appender(name, T::class) {
+inline fun <reified T : Appender> Log4J.appender(name : String, crossinline l : Log4JAppender.() -> Unit) : Log4jAppenderRef{
+  return appender(name, T::class) {
   }
 }
 
