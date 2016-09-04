@@ -1,0 +1,6 @@
+dependencies {
+  compile project(':api')
+  compile project(':generator:util')
+
+  compile 'org.apache.commons:commons-lang3:3.3.2'
+}
