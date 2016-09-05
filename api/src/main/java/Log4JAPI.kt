@@ -85,3 +85,24 @@ interface Log4JLogger {
   var level : Log4JLevel
   var appenders : List<Log4JAppenderRef>
 }
+
+val Log4JLogger.OFF : Log4JLevel
+  get() = Log4JLevel.OFF
+
+val Log4JLogger.FATAL : Log4JLevel
+  get() = Log4JLevel.FATAL
+
+val Log4JLogger.ERROR : Log4JLevel
+  get() = Log4JLevel.ERROR
+
+val Log4JLogger.WARN : Log4JLevel
+  get() = Log4JLevel.WARN
+
+val Log4JLogger.INFO : Log4JLevel
+  get() = Log4JLevel.INFO
+
+val Log4JLogger.DEBUG : Log4JLevel
+  get() = Log4JLevel.DEBUG
+
+val Log4JLogger.ALL : Log4JLevel
+  get() = Log4JLevel.ALL
