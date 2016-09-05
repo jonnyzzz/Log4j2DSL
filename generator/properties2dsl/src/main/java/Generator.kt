@@ -1,9 +1,7 @@
 package org.jonnyzzz.log4j2dsl.generator
 
-import org.jonnyzzz.log4j2dsl.Log4J
-import org.jonnyzzz.log4j2dsl.Log4JBase
-import org.jonnyzzz.log4j2dsl.Log4JLogger
 import org.jonnyzzz.log4j2dsl.PropertiesModel
+import org.jonnyzzz.log4j2dsl.div
 import java.io.File
 
 private fun usage() {
@@ -47,74 +45,10 @@ private fun mainImpl(args: Array<String>) {
   }
 
   val model = PropertiesModel().apply { load(propertiesFile) }
+  val code = TheGenerator.generate(model)
 
-
-}
-
-object TheGenerator {
-  fun generate(model : PropertiesModel) : String = kotlinWriter {
-    generateFileHeader("Log4J2DSL", "0.0.1")
-    appendln()
-
-    declareBuilder("file", "log4j") {
-      generateAppenders(model)
-
-      appendln()
-
-      generateLoggers(model)
-    }
-  }
-
-  private fun KotlinWriter.generateAppenders(model : PropertiesModel) {
-    val prefix = "log4j.appender."
-
-    val appenders = model
-            .allProperties(prefix)
-            .map { it.key.substring(prefix.length) to it.value }
-            .groupBy { it.first.split(".", limit = 2)[0] }
-            .map { it.key to it.value.map { v -> v.first.substring(it.key.length + 1) to v.second } }
-
-    println("Detected appenders: ${appenders.map { it.first }.toSortedSet() }")
-
-    appenders.forEach { appender ->
-      declareBuilder(appender.first, "${Log4J::appender.name}(${appender.first.quote()}, TYPE )") {
-        appender.second.forEach { param ->
-          appendln("${Log4JBase::param.name}(${param.first.quote()}, ${param.second.quote()})")
-        }
-      }
-
-      appendln()
-    }
-  }
-
-  private fun KotlinWriter.generateLoggers(model : PropertiesModel) {
-    val loggerPrefix = "log4j.logger."
-    val additivityPrefix = "log4j.additivity."
-
-    val loggers = model
-            .allProperties(loggerPrefix)
-            .map { it.key.substring(loggerPrefix.length) to it.value }
-
-    val additivity = model
-            .allProperties(additivityPrefix)
-            .map { it.key.substring(loggerPrefix.length) to it.value }
-
-
-    println("Detected loggers: ${loggers.map { it.first }.toSortedSet() }")
-
-    loggers.forEach { logger ->
-
-      block("logger(${logger.first.quote()}") {
-        appendln("${Log4JBase::param.name}(\"\", ${logger.second.quote()})")
-
-        additivity.find{ it.first == logger.first}?.let {
-          appendln("${Log4JLogger::additivity.name} = $it")
-        }
-      }
-
-      appendln()
-    }
-  }
-
+  val targetFile = targetDirectory / "log4j.kt"
+  targetFile.parentFile?.mkdirs()
+  targetFile.writeText(code)
 }
 

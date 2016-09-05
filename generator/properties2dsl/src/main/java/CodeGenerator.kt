@@ -100,11 +100,6 @@ fun String.escaped(forDoubleQuotedString: Boolean = true): String {
 }
 
 fun String.quote(): String {
-  val encoded = escaped(false)
-  return "\'$encoded\'"
-}
-
-fun String.dquote(): String {
   val encoded = escaped()
   return "\"$encoded\""
 }

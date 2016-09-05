@@ -1,13 +1,17 @@
 package org.jonnyzzz.log4j2dsl
 
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.StringWriter
 import java.util.*
 
 class PropertiesModel {
   private val data = LinkedHashMap<String, String>()
 
-  fun load(propertiesFile : File) {
+  fun load(propertiesFile : File) = propertiesFile.inputStream().use { load(it) }
+
+  fun load(propertiesFile : InputStream) {
     object: Properties() {
       override fun put(key: Any?, value: Any?): Any? {
         data.put(key as String, value as String)
@@ -17,6 +21,10 @@ class PropertiesModel {
   }
 
   fun save(propertiesFile : File) {
+    propertiesFile.outputStream().use { save(it) }
+  }
+
+  fun save(propertiesFile : OutputStream) {
     val fakeOutput = StringWriter()
     val data = LinkedHashMap(this.data)
     object: Properties() {
@@ -27,7 +35,7 @@ class PropertiesModel {
             .apply { fakeOutput.use { store(it, null) } }
 
     val textWithoutTimeComment = fakeOutput.toString().split("\n").drop(1).joinToString("\n")
-    propertiesFile.writeText(textWithoutTimeComment)
+    propertiesFile.write(textWithoutTimeComment.toByteArray(Charsets.UTF_8))
   }
 
   fun allProperties(prefix : String = "" ) = data.filter { it.key.startsWith(prefix) }
